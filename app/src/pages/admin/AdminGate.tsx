@@ -1,4 +1,5 @@
-import { ReactNode, useEffect } from "react";
+import type { ReactNode } from "react";
+import { useEffect } from "react";
 import { GlassButton } from "../../components/glass/GlassButton";
 import { GlassCard } from "../../components/glass/GlassCard";
 import { useAdminStore } from "../../store/useAdminStore";

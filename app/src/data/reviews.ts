@@ -2,7 +2,7 @@ export const reviews = [
   {
     name: "Ananya Verma",
     role: "Food Blogger",
-    text: "Best food near me in Sultanpur. The Avantika Food Mall butter chicken is a creamy dream and the glass dining vibe is unforgettable.",
+    text: "Best food near me in Sultanpur. The Avantika Food Mall paneer lababdar is a creamy dream and the glass dining vibe is unforgettable.",
     rating: 5,
   },
   {

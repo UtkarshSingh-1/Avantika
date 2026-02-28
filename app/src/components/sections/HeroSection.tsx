@@ -13,35 +13,48 @@ export function HeroSection() {
   const heroRef = useRef<HTMLElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const durationRef = useRef(0);
+  const targetProgressRef = useRef(0);
+  const renderedProgressRef = useRef(0);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     let raf = 0;
-    const updateFromScroll = () => {
-      raf = 0;
+    const applyProgress = (progress: number) => {
+      const clamped = Math.min(Math.max(progress, 0), 1);
       const height = heroRef.current?.offsetHeight || window.innerHeight;
-      const progress = Math.min(window.scrollY / Math.max(1, height * 0.9), 1);
-
       setStyle({
-        scale: 1 + progress * 0.12,
-        translateY: -progress * 80,
-        overlayOpacity: 0.4 + progress * 0.3,
-        textOffset: -progress * 60,
+        scale: 1 + clamped * 0.12,
+        translateY: -clamped * 80,
+        overlayOpacity: 0.4 + clamped * 0.3,
+        textOffset: -clamped * 60,
       });
 
       if (durationRef.current > 0) {
-        const targetTime = durationRef.current * progress;
+        const targetTime = durationRef.current * clamped;
         if (Math.abs(video.currentTime - targetTime) > 0.025) {
           video.currentTime = targetTime;
         }
       }
+      return height;
+    };
+
+    const animate = () => {
+      const target = targetProgressRef.current;
+      const current = renderedProgressRef.current;
+      const next = current + (target - current) * 0.14;
+      renderedProgressRef.current = Math.abs(next - target) < 0.0008 ? target : next;
+      applyProgress(renderedProgressRef.current);
+      raf = requestAnimationFrame(animate);
     };
 
     const onScroll = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(updateFromScroll);
+      const height = heroRef.current?.offsetHeight || window.innerHeight;
+      targetProgressRef.current = Math.min(
+        window.scrollY / Math.max(1, height * 0.9),
+        1
+      );
     };
     const onResize = onScroll;
     const onLoadedMetadata = () => {
@@ -56,6 +69,7 @@ export function HeroSection() {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
     onScroll();
+    raf = requestAnimationFrame(animate);
 
     return () => {
       video.removeEventListener("loadedmetadata", onLoadedMetadata);

@@ -168,9 +168,44 @@ export const menuItems = [
   },
 ];
 
-export let orders = [];
-export let reservations = [];
-export let tables = Array.from({ length: 18 }).map((_, i) => ({
+export type OrderItem = {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  notes?: string;
+};
+
+export type Order = {
+  id: string;
+  table: string | null;
+  items: OrderItem[];
+  total: number;
+  dineIn: boolean;
+  status: "pending" | "preparing" | "ready" | "served" | "cancelled";
+  createdAt: string;
+};
+
+export type Reservation = {
+  id: string;
+  name: string;
+  phone: string;
+  date: string;
+  time: string;
+  guests: number;
+  table: string;
+  status: "pending" | "approved" | "cancelled";
+  createdAt: string;
+};
+
+export type Table = {
+  id: string;
+  occupied: boolean;
+};
+
+export let orders: Order[] = [];
+export let reservations: Reservation[] = [];
+export let tables: Table[] = Array.from({ length: 18 }).map((_, i) => ({
   id: `T${i + 1}`,
   occupied: false,
 }));

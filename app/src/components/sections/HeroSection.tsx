@@ -1,64 +1,72 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { GlassButton } from "../glass/GlassButton";
 
 export function HeroSection() {
   const heroRef = useRef<HTMLElement | null>(null);
   const frameCount = 240;
-  const [frame, setFrame] = useState(1);
-  const frameRef = useRef(1);
-
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 30,
-    mass: 0.25,
-  });
-
-  const scale = useTransform(smoothProgress, [0, 1], [1, 1.12]);
-  const translateY = useTransform(smoothProgress, [0, 1], [0, -80]);
-  const overlayOpacity = useTransform(smoothProgress, [0, 1], [0.4, 0.7]);
-  const textOffset = useTransform(smoothProgress, [0, 1], [0, -60]);
+  const [progress, setProgress] = useState(0);
+  const [frame, setFrame] = useState(2);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const height = heroRef.current?.offsetHeight || window.innerHeight || 1;
+      const nextProgress = Math.min(window.scrollY / Math.max(1, height * 0.9), 1);
+      setProgress(nextProgress);
+      const nextFrame = Math.max(
+        1,
+        Math.min(frameCount, Math.floor(nextProgress * (frameCount - 1)) + 1)
+      );
+      setFrame(nextFrame);
+    };
+
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(update);
+    };
+
+    const onResize = onScroll;
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize);
+
+    onScroll();
+
     const preloadCount = 60;
     for (let i = 1; i <= preloadCount; i += 1) {
       const img = new Image();
       img.src = `/hero-frames/frame_${String(i).padStart(4, "0")}.jpg`;
     }
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
-  useMotionValueEvent(smoothProgress, "change", (p) => {
-    const progress = Math.min(Math.max(p, 0), 1);
-    const next = Math.max(
-      1,
-      Math.min(frameCount, Math.floor(progress * (frameCount - 1)) + 1)
-    );
-
-    if (frameRef.current !== next) {
-      frameRef.current = next;
-      setFrame(next);
-    }
-  });
+  const style = useMemo(
+    () => ({
+      scale: 1 + progress * 0.12,
+      translateY: -progress * 80,
+      overlayOpacity: 0.4 + progress * 0.3,
+      textOffset: -progress * 60,
+    }),
+    [progress]
+  );
 
   return (
     <section ref={heroRef} className="relative h-screen w-full overflow-hidden">
-      <motion.div
+      <div
         className="absolute inset-0"
         style={{
-          scale,
-          y: translateY,
+          transform: `scale(${style.scale}) translateY(${style.translateY}px)`,
+          transformOrigin: "center",
           willChange: "transform",
         }}
       >
@@ -69,17 +77,17 @@ export function HeroSection() {
           loading="eager"
           decoding="async"
         />
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         className="absolute inset-0 bg-hero-overlay"
-        style={{ opacity: overlayOpacity }}
+        style={{ opacity: style.overlayOpacity }}
       />
 
       <div className="relative z-10 flex h-full items-center justify-center px-6 text-center">
         <motion.div
           className="max-w-3xl"
-          style={{ y: textOffset }}
+          style={{ transform: `translateY(${style.textOffset}px)` }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}

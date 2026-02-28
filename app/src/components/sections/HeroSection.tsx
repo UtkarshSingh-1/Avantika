@@ -1,91 +1,67 @@
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import {
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import Link from "next/link";
 import { GlassButton } from "../glass/GlassButton";
 
 export function HeroSection() {
-  const [style, setStyle] = useState({
-    scale: 1,
-    translateY: 0,
-    overlayOpacity: 0.4,
-    textOffset: 0,
-  });
   const heroRef = useRef<HTMLElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const durationRef = useRef(0);
-  const targetProgressRef = useRef(0);
-  const renderedProgressRef = useRef(0);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    mass: 0.25,
+  });
+  const scale = useTransform(smoothProgress, [0, 1], [1, 1.12]);
+  const translateY = useTransform(smoothProgress, [0, 1], [0, -80]);
+  const overlayOpacity = useTransform(smoothProgress, [0, 1], [0.4, 0.7]);
+  const textOffset = useTransform(smoothProgress, [0, 1], [0, -60]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    let raf = 0;
-    const applyProgress = (progress: number) => {
-      const clamped = Math.min(Math.max(progress, 0), 1);
-      const height = heroRef.current?.offsetHeight || window.innerHeight;
-      setStyle({
-        scale: 1 + clamped * 0.12,
-        translateY: -clamped * 80,
-        overlayOpacity: 0.4 + clamped * 0.3,
-        textOffset: -clamped * 60,
-      });
-
-      if (durationRef.current > 0) {
-        const targetTime = durationRef.current * clamped;
-        if (Math.abs(video.currentTime - targetTime) > 0.025) {
-          video.currentTime = targetTime;
-        }
-      }
-      return height;
-    };
-
-    const animate = () => {
-      const target = targetProgressRef.current;
-      const current = renderedProgressRef.current;
-      const next = current + (target - current) * 0.14;
-      renderedProgressRef.current = Math.abs(next - target) < 0.0008 ? target : next;
-      applyProgress(renderedProgressRef.current);
-      raf = requestAnimationFrame(animate);
-    };
-
-    const onScroll = () => {
-      const height = heroRef.current?.offsetHeight || window.innerHeight;
-      targetProgressRef.current = Math.min(
-        window.scrollY / Math.max(1, height * 0.9),
-        1
-      );
-    };
-    const onResize = onScroll;
     const onLoadedMetadata = () => {
       durationRef.current = Number.isFinite(video.duration) ? video.duration : 0;
-      onScroll();
     };
 
     video.pause();
     video.muted = true;
     video.playsInline = true;
     video.addEventListener("loadedmetadata", onLoadedMetadata);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    onScroll();
-    raf = requestAnimationFrame(animate);
 
     return () => {
       video.removeEventListener("loadedmetadata", onLoadedMetadata);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
 
+  useMotionValueEvent(smoothProgress, "change", (p) => {
+    const video = videoRef.current;
+    if (!video || durationRef.current <= 0) return;
+    const progress = Math.min(Math.max(p, 0), 1);
+    const targetTime = durationRef.current * progress;
+    if (Math.abs(video.currentTime - targetTime) > 0.02) {
+      video.currentTime = targetTime;
+    }
+  });
+
   return (
     <section ref={heroRef} className="relative h-screen w-full overflow-hidden">
-      <div
+      <motion.div
         className="absolute inset-0"
         style={{
-          transform: `scale(${style.scale}) translateY(${style.translateY}px)`,
-          transformOrigin: "center",
+          scale,
+          y: translateY,
           willChange: "transform",
         }}
       >
@@ -99,15 +75,15 @@ export function HeroSection() {
           <source src="/gemini_generated_video_049c7940.webm" type="video/webm" />
           <source src="/gemini_generated_video_049c7940.mp4" type="video/mp4" />
         </video>
-      </div>
-      <div
+      </motion.div>
+      <motion.div
         className="absolute inset-0 bg-hero-overlay"
-        style={{ opacity: style.overlayOpacity }}
+        style={{ opacity: overlayOpacity }}
       />
       <div className="relative z-10 flex h-full items-center justify-center text-center px-6">
         <motion.div
           className="max-w-3xl"
-          style={{ transform: `translateY(${style.textOffset}px)` }}
+          style={{ y: textOffset }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}

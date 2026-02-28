@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { useScrollHero } from "../../hooks/useScrollHero";
 import Link from "next/link";
 import { GlassButton } from "../glass/GlassButton";
 
 export function HeroSection() {
-  const scrollState = useScrollHero();
   const [style, setStyle] = useState({
     scale: 1,
     translateY: 0,
@@ -13,56 +11,59 @@ export function HeroSection() {
     textOffset: 0,
   });
   const heroRef = useRef<HTMLElement | null>(null);
-  const initRef = useRef(false);
-  const frameCount = 240;
-  const [frame, setFrame] = useState(1);
-  const frameRef = useRef(1);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const durationRef = useRef(0);
 
   useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
     let raf = 0;
-    const tick = () => {
-      raf = requestAnimationFrame(() => {
-        setStyle({ ...scrollState.current });
-        tick();
+    const updateFromScroll = () => {
+      raf = 0;
+      const height = heroRef.current?.offsetHeight || window.innerHeight;
+      const progress = Math.min(window.scrollY / Math.max(1, height * 0.9), 1);
+
+      setStyle({
+        scale: 1 + progress * 0.12,
+        translateY: -progress * 80,
+        overlayOpacity: 0.4 + progress * 0.3,
+        textOffset: -progress * 60,
       });
-    };
-    tick();
-    return () => cancelAnimationFrame(raf);
-  }, [scrollState]);
 
-  useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
-    let raf = 0;
+      if (durationRef.current > 0) {
+        const targetTime = durationRef.current * progress;
+        if (Math.abs(video.currentTime - targetTime) > 0.025) {
+          video.currentTime = targetTime;
+        }
+      }
+    };
 
     const onScroll = () => {
       if (raf) return;
-      raf = requestAnimationFrame(() => {
-        const height = heroRef.current?.offsetHeight || window.innerHeight;
-        const progress = Math.min(window.scrollY / Math.max(1, height * 0.9), 1);
-        const next = Math.max(
-          1,
-          Math.min(frameCount, Math.floor(progress * (frameCount - 1)) + 1)
-        );
-        if (frameRef.current !== next) {
-          frameRef.current = next;
-          setFrame(next);
-        }
-        raf = 0;
-      });
+      raf = requestAnimationFrame(updateFromScroll);
+    };
+    const onResize = onScroll;
+    const onLoadedMetadata = () => {
+      durationRef.current = Number.isFinite(video.duration) ? video.duration : 0;
+      onScroll();
     };
 
+    video.pause();
+    video.muted = true;
+    video.playsInline = true;
+    video.addEventListener("loadedmetadata", onLoadedMetadata);
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", onResize);
     onScroll();
 
     return () => {
+      video.removeEventListener("loadedmetadata", onLoadedMetadata);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
       if (raf) cancelAnimationFrame(raf);
     };
   }, []);
-
 
   return (
     <section ref={heroRef} className="relative h-screen w-full overflow-hidden">
@@ -71,14 +72,19 @@ export function HeroSection() {
         style={{
           transform: `scale(${style.scale}) translateY(${style.translateY}px)`,
           transformOrigin: "center",
-          transition: "transform 0.1s linear",
+          willChange: "transform",
         }}
       >
-        <img
+        <video
+          ref={videoRef}
           className="h-full w-full object-cover"
-          src={`/hero-frames/frame_${String(frame).padStart(4, "0")}.jpg`}
-          alt="Hero sequence"
-        />
+          muted
+          playsInline
+          preload="auto"
+        >
+          <source src="/gemini_generated_video_049c7940.webm" type="video/webm" />
+          <source src="/gemini_generated_video_049c7940.mp4" type="video/mp4" />
+        </video>
       </div>
       <div
         className="absolute inset-0 bg-hero-overlay"

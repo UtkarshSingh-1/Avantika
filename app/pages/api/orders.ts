@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import type { Order } from "./_data";
 import { orders } from "./_data";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -6,7 +7,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(200).json(orders);
   }
   if (req.method === "POST") {
-    const order = {
+    const order: Order = {
       id: String(Date.now()),
       table: req.body.table,
       items: req.body.items,

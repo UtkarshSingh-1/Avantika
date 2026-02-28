@@ -7,9 +7,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(200).json(orders);
   }
   if (req.method === "POST") {
+    const tableValue =
+      req.body.table && String(req.body.table).trim().length > 0
+        ? String(req.body.table)
+        : null;
     const order: Order = {
       id: String(Date.now()),
-      table: req.body.table,
+      table: tableValue,
       items: req.body.items,
       total: req.body.total,
       dineIn: req.body.dineIn,

@@ -21,6 +21,8 @@ export function CartPage() {
   } = useCartStore();
   const { placeOrder, loading, lastOrder } = useOrderStore();
 
+  const canPlaceOrder = items.length > 0 && (!dineIn || Boolean(table));
+
   return (
     <div className="section-wrap pt-32">
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
@@ -31,32 +33,25 @@ export function CartPage() {
             ) : (
               <div className="space-y-4">
                 {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex flex-col gap-3 border-b border-white/10 pb-4"
-                  >
+                  <div key={item.id} className="flex flex-col gap-3 border-b border-white/10 pb-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-semibold">{item.menuItem.name}</h4>
                         <p className="text-sm text-white/60">
-                          ₹{item.menuItem.price} x {item.quantity}
+                          INR {item.menuItem.price} x {item.quantity}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          className="glass px-3 py-1 rounded-full"
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
-                          }
+                          className="glass rounded-full px-3 py-1"
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         >
                           -
                         </button>
                         <span>{item.quantity}</span>
                         <button
-                          className="glass px-3 py-1 rounded-full"
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
-                          }
+                          className="glass rounded-full px-3 py-1"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         >
                           +
                         </button>
@@ -79,30 +74,22 @@ export function CartPage() {
             )}
           </GlassCard>
 
-          <GlassCard
-            title="Table Selection"
-            subtitle="Choose your table or let QR auto-assign."
-          >
+          <GlassCard title="Table Selection" subtitle="Choose your table or let QR auto-assign.">
             <div className="flex flex-wrap gap-2">
               {tables.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => setTable(t.id)}
-                  className={`glass px-4 py-2 rounded-full text-sm ${
-                    table === t.id ? "bg-white/20" : ""
-                  }`}
+                  className={`glass rounded-full px-4 py-2 text-sm ${table === t.id ? "bg-white/20" : ""}`}
                 >
                   {t.name}
                 </button>
               ))}
             </div>
             <div className="mt-4">
-              <Toggle
-                checked={dineIn}
-                onChange={toggleDineIn}
-                labels={["Dine-in", "Takeaway"]}
-              />
+              <Toggle checked={dineIn} onChange={toggleDineIn} labels={["Dine-in", "Takeaway"]} />
             </div>
+            {!dineIn && <p className="mt-3 text-sm text-white/70">Takeaway selected: table is optional.</p>}
           </GlassCard>
         </div>
 
@@ -112,22 +99,17 @@ export function CartPage() {
               <span>Items</span>
               <span>{items.length}</span>
             </div>
-            <div className="flex items-center justify-between text-white/70 mt-2">
+            <div className="mt-2 flex items-center justify-between text-white/70">
               <span>Table</span>
               <span>{table || "Not selected"}</span>
             </div>
-            <div className="flex items-center justify-between text-white/70 mt-2">
+            <div className="mt-2 flex items-center justify-between text-white/70">
               <span>Total</span>
-              <span className="text-lg font-semibold text-white">
-                ₹{total()}
-              </span>
+              <span className="text-lg font-semibold text-white">INR {total()}</span>
             </div>
             <div className="mt-6 space-y-3">
-              <GlassButton
-                disabled={items.length === 0 || !table || loading}
-                onClick={() => placeOrder()}
-              >
-                Place Order
+              <GlassButton disabled={!canPlaceOrder || loading} onClick={() => placeOrder()}>
+                {loading ? "Placing..." : "Place Order"}
               </GlassButton>
               <Link href="/menu">
                 <GlassButton variant="secondary">View Menu</GlassButton>
@@ -141,8 +123,7 @@ export function CartPage() {
           </GlassCard>
 
           <div className="glass p-4 text-sm text-white/70">
-            QR camera hint: scan the table QR to auto-fill table number for
-            seamless ordering.
+            QR camera hint: scan the table QR to auto-fill table number for seamless ordering.
           </div>
         </div>
       </div>

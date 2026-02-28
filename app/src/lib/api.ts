@@ -22,4 +22,11 @@ export const api = {
     if (!res.ok) throw new Error("Request failed");
     return res.json();
   },
+  async delete<T>(path: string): Promise<T> {
+    const res = await fetch(`/api${path}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error("Request failed");
+    return res.json();
+  },
 };

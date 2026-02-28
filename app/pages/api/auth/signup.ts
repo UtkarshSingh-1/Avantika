@@ -34,5 +34,5 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       process.env.NODE_ENV === "production" ? "; Secure" : ""
     }`
   );
-  return res.status(200).json({ ok: true });
+  return res.status(200).json({ ok: true, role: "user" });
 }

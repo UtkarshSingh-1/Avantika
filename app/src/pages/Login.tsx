@@ -36,18 +36,16 @@ export function LoginPage() {
       setError(data.error || "Login failed.");
       return;
     }
+    const data = await res.json();
+    if (data.role === "admin") {
+      adminLogin();
+      router.push("/admin");
+      return;
+    }
     router.push("/");
   };
 
   const handleLogin = async () => {
-    if (
-      emailInput === "admin@avantika.com" &&
-      passwordInput === "admin123"
-    ) {
-      adminLogin();
-      router.push("/");
-      return;
-    }
     await handleUserLogin();
   };
 
@@ -57,9 +55,14 @@ export function LoginPage() {
 
   useEffect(() => {
     if (user) {
+      if (user.role === "admin") {
+        adminLogin();
+        router.push("/admin");
+        return;
+      }
       router.push("/");
     }
-  }, [user, router]);
+  }, [user, adminLogin, router]);
 
   return (
     <div className="section-wrap pt-32 flex justify-center">
@@ -175,6 +178,14 @@ export function LoginPage() {
           {error && <p className="mt-4 text-sm text-red-200">{error}</p>}
           <div className="mt-4 text-sm text-white/80">
             OTP is required for first-time signup only.
+          </div>
+          <div className="mt-2 text-xs text-white/70">
+            Demo admin: <span className="text-white">admin@avantika.com</span> /{" "}
+            <span className="text-white">admin123</span>
+          </div>
+          <div className="mt-1 text-xs text-white/70">
+            Demo user: <span className="text-white">user@avantika.com</span> /{" "}
+            <span className="text-white">user123</span>
           </div>
         </form>
       </GlassCard>

@@ -1,4 +1,4 @@
-export const menuCategories = [
+export let menuCategories = [
   {
     id: "starters",
     name: "Signature Starters",
@@ -31,7 +31,7 @@ export const menuCategories = [
   },
 ];
 
-export const menuItems = [
+export let menuItems = [
   {
     id: "s1",
     name: "Smoked Paneer Tikka",
@@ -182,7 +182,7 @@ export type Order = {
   items: OrderItem[];
   total: number;
   dineIn: boolean;
-  status: "pending" | "preparing" | "ready" | "served" | "cancelled";
+  status: "pending" | "confirmed" | "preparing" | "served" | "completed";
   createdAt: string;
 };
 

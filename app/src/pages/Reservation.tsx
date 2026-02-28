@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { GlassButton } from "../components/glass/GlassButton";
 import { GlassCard } from "../components/glass/GlassCard";
 import { GlassInput } from "../components/glass/GlassInput";
@@ -7,6 +8,7 @@ import { tables } from "../data/tables";
 import { useReservationStore } from "../store/useReservationStore";
 
 export function ReservationPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [date, setDate] = useState("");
@@ -14,18 +16,32 @@ export function ReservationPage() {
   const [guests, setGuests] = useState(2);
   const [table, setTable] = useState("");
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { createReservation } = useReservationStore();
 
   const handleSubmit = async () => {
-    await createReservation({
-      name,
-      phone,
-      date,
-      time,
-      guests,
-      table,
-    });
-    setSuccess(true);
+    setError("");
+    if (!name || !phone || !date || !time || !table || guests < 1) {
+      setError("Please fill all required details.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await createReservation({
+        name,
+        phone,
+        date,
+        time,
+        guests,
+        table,
+      });
+      setSuccess(true);
+    } catch {
+      setError("Reservation failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,9 +83,14 @@ export function ReservationPage() {
               </label>
             </div>
             <div className="mt-6 flex gap-3">
-              <GlassButton onClick={handleSubmit}>Confirm Reservation</GlassButton>
-              <GlassButton variant="secondary">Order Now</GlassButton>
+              <GlassButton onClick={handleSubmit} disabled={loading}>
+                {loading ? "Confirming..." : "Confirm Reservation"}
+              </GlassButton>
+              <GlassButton variant="secondary" onClick={() => router.push("/menu")}>
+                Order Now
+              </GlassButton>
             </div>
+            {error && <p className="mt-4 text-sm text-red-200">{error}</p>}
           </>
         ) : (
           <div className="text-center">
@@ -78,7 +99,7 @@ export function ReservationPage() {
               Your table is reserved. We look forward to serving you at Avantika Food Mall.
             </p>
             <div className="mt-6 flex justify-center gap-3">
-              <GlassButton>Order Now</GlassButton>
+              <GlassButton onClick={() => router.push("/menu")}>Order Now</GlassButton>
               <Link href="/">
                 <GlassButton variant="secondary">Back to Home</GlassButton>
               </Link>

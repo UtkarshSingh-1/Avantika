@@ -24,7 +24,7 @@ export type CartItem = {
 
 export type Order = {
   id: string;
-  table: string;
+  table: string | null;
   items: CartItem[];
   total: number;
   status: "pending" | "confirmed" | "preparing" | "served" | "completed";
@@ -41,4 +41,10 @@ export type Reservation = {
   guests: number;
   table: string;
   status: "pending" | "approved" | "cancelled";
+  createdAt?: string;
+};
+
+export type Table = {
+  id: string;
+  occupied: boolean;
 };

@@ -36,14 +36,20 @@ export function MenuPage() {
         subtitle="Browse our Indian cuisine Sultanpur selection. Online food order Sultanpur made easy with QR ordering."
         action={
           <>
-            <GlassButton>Order Now</GlassButton>
-            <GlassButton variant="secondary">Reserve Table</GlassButton>
+            <GlassButton onClick={() => router.push("/cart")}>Order Now</GlassButton>
+            <GlassButton
+              variant="secondary"
+              onClick={() => router.push("/reservation")}
+            >
+              Reserve Table
+            </GlassButton>
           </>
         }
       />
-      <div className="flex flex-wrap gap-3 mb-8">
+
+      <div className="mb-8 flex flex-wrap gap-3">
         <button
-          className={`glass px-4 py-2 rounded-full text-sm ${
+          className={`glass rounded-full px-4 py-2 text-sm ${
             selectedCategory === "all" ? "bg-white/20" : ""
           }`}
           onClick={() => setCategory("all")}
@@ -53,7 +59,7 @@ export function MenuPage() {
         {categories.map((cat) => (
           <button
             key={cat.id}
-            className={`glass px-4 py-2 rounded-full text-sm ${
+            className={`glass rounded-full px-4 py-2 text-sm ${
               selectedCategory === cat.id ? "bg-white/20" : ""
             }`}
             onClick={() => setCategory(cat.id)}
@@ -62,6 +68,7 @@ export function MenuPage() {
           </button>
         ))}
       </div>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((dish) => (
           <GlassCard key={dish.id} className="flex flex-col gap-4">
@@ -72,18 +79,26 @@ export function MenuPage() {
             />
             <div>
               <h3 className="text-xl font-semibold">{dish.name}</h3>
-              <p className="text-sm text-white/70 mt-2">{dish.description}</p>
+              <p className="mt-2 text-sm text-white/70">{dish.description}</p>
             </div>
-            <div className="flex items-center justify-between mt-auto">
-              <span className="text-lg font-semibold">₹{dish.price}</span>
-              <GlassButton onClick={() => addItem(dish)}>Add to Cart</GlassButton>
+            <div className="mt-auto flex items-center justify-between">
+              <span className="text-lg font-semibold">INR {dish.price}</span>
+              <GlassButton
+                onClick={() => {
+                  addItem(dish);
+                  router.push("/cart");
+                }}
+              >
+                Add to Cart
+              </GlassButton>
             </div>
           </GlassCard>
         ))}
       </div>
+
       {isMobile && (
         <div className="fixed bottom-20 right-4 z-40">
-          <GlassButton>Order Now</GlassButton>
+          <GlassButton onClick={() => router.push("/cart")}>Order Now</GlassButton>
         </div>
       )}
     </div>

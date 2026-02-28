@@ -5,7 +5,8 @@ type AuthUser = {
   email: string;
   name: string;
   picture?: string;
-  provider: "google";
+  provider: "google" | "local";
+  role?: "user" | "admin";
 };
 
 type AuthState = {

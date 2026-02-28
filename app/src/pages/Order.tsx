@@ -1,12 +1,22 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { GlassButton } from "../components/glass/GlassButton";
 import { GlassCard } from "../components/glass/GlassCard";
 import { useUserStore } from "../store/useUserStore";
 import { useOrderStore } from "../store/useOrderStore";
 
 export function OrderPage() {
-  const { phone, otpVerified, setPhone } = useUserStore();
+  const router = useRouter();
+  const { phone, otpVerified, setPhone, setOtpVerified, login } = useUserStore();
   const { lastOrder } = useOrderStore();
+  const canSendOtp = phone.trim().length >= 10;
+
+  const sendGuestOtp = () => {
+    if (!canSendOtp) return;
+    setOtpVerified(true);
+    login();
+    router.push("/cart");
+  };
 
   return (
     <div className="section-wrap pt-32">
@@ -23,7 +33,9 @@ export function OrderPage() {
             onChange={(e) => setPhone(e.target.value)}
           />
           <div className="mt-4 flex gap-3">
-            <GlassButton>Send OTP</GlassButton>
+            <GlassButton disabled={!canSendOtp} onClick={sendGuestOtp}>
+              Send OTP
+            </GlassButton>
             <Link href="/otp">
               <GlassButton variant="secondary">Go to OTP</GlassButton>
             </Link>
@@ -38,7 +50,9 @@ export function OrderPage() {
             <Link href="/login">
               <GlassButton>Login</GlassButton>
             </Link>
-            <GlassButton variant="secondary">Create Account</GlassButton>
+            <Link href="/signup">
+              <GlassButton variant="secondary">Create Account</GlassButton>
+            </Link>
           </div>
           <div className="mt-6 text-sm text-white/60">
             OTP verified: {otpVerified ? "Yes" : "No"}
@@ -66,14 +80,20 @@ export function OrderPage() {
             Use QR code restaurant ordering for your table. The system will auto
             assign table number.
           </p>
-          <GlassButton className="mt-4">Scan QR</GlassButton>
+          <GlassButton className="mt-4" onClick={() => router.push("/menu?table=T1")}>
+            Scan QR
+          </GlassButton>
         </GlassCard>
         <GlassCard title="Reserve Table">
           <p className="text-white/70">
             Plan ahead with table reservation restaurant options and custom menu
             packages.
           </p>
-          <GlassButton variant="secondary" className="mt-4">
+          <GlassButton
+            variant="secondary"
+            className="mt-4"
+            onClick={() => router.push("/reservation")}
+          >
             Reserve Table
           </GlassButton>
         </GlassCard>

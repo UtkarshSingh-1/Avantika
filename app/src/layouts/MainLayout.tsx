@@ -8,9 +8,10 @@ import { useCartStore } from "../store/useCartStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { BottomCartBar } from "../components/common/BottomCartBar";
 import { useUserStore } from "../store/useUserStore";
+import { useAdminStore } from "../store/useAdminStore";
 
 const linkClass =
-  "text-sm text-white/70 hover:text-white transition px-3 py-2 rounded-full";
+  "rounded-full px-3 py-2 text-sm text-white/70 transition hover:text-white";
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const itemsCount = useCartStore((s) => s.items.length);
@@ -18,22 +19,29 @@ export function MainLayout({ children }: { children: ReactNode }) {
   const isHome = router.pathname === "/";
   const { user, loadSession, logout } = useAuthStore();
   const isOtpLoggedIn = useUserStore((s) => s.isLoggedIn);
+  const localLogout = useUserStore((s) => s.logout);
+  const adminLogout = useAdminStore((s) => s.logout);
   const isLoggedIn = Boolean(user) || isOtpLoggedIn;
 
   useEffect(() => {
     loadSession();
   }, [loadSession]);
 
+  const handleLogout = async () => {
+    await logout();
+    localLogout();
+    adminLogout();
+    router.push("/");
+  };
+
   return (
     <div className="min-h-screen">
       <GlassNavbar>
         <div className="flex items-center gap-4">
           <span className="font-display text-lg">Avantika Food Mall</span>
-          <span className="hidden md:block text-xs text-white/60">
-            Restaurant in Sultanpur
-          </span>
+          <span className="hidden text-xs text-white/60 md:block">Restaurant in Sultanpur</span>
         </div>
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden items-center gap-2 md:flex">
           {[
             { href: "/", label: "Home" },
             { href: "/menu", label: "Menu" },
@@ -43,9 +51,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
             <Link
               key={link.href}
               href={link.href}
-              className={`${linkClass} ${
-                router.pathname === link.href ? "bg-white/20 text-white" : ""
-              }`}
+              className={`${linkClass} ${router.pathname === link.href ? "bg-white/20 text-white" : ""}`}
             >
               {link.label}
             </Link>
@@ -58,15 +64,14 @@ export function MainLayout({ children }: { children: ReactNode }) {
             </Link>
           ) : (
             <>
-              <GlassButton variant="secondary">Scan QR</GlassButton>
+              <GlassButton variant="secondary" onClick={() => router.push("/menu?table=T1")}>
+                Scan QR
+              </GlassButton>
               <Link href="/cart" className="relative">
                 <GlassButton>Cart ({itemsCount})</GlassButton>
               </Link>
-              <button
-                className="glass px-4 py-2 rounded-full text-sm"
-                onClick={() => logout()}
-              >
-                {user ? user.name.split(" ")[0] : "Profile"} • Logout
+              <button className="glass rounded-full px-4 py-2 text-sm" onClick={handleLogout}>
+                {user ? user.name.split(" ")[0] : "Profile"} | Logout
               </button>
             </>
           )}

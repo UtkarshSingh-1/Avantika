@@ -29,7 +29,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
   },
   placeOrder: async () => {
     const cart = useCartStore.getState();
-    if (cart.items.length === 0 || !cart.table) return null;
+    if (cart.items.length === 0 || (cart.dineIn && !cart.table)) return null;
     set({ loading: true });
     try {
       const newOrder = await api.post<Order>("/orders", {
@@ -38,6 +38,9 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         total: cart.total(),
         dineIn: cart.dineIn,
       });
+      if (cart.dineIn && cart.table) {
+        await api.patch(`/tables/${cart.table}`, { occupied: true });
+      }
       set({ lastOrder: newOrder, orders: [newOrder, ...get().orders] });
       cart.clear();
       return newOrder;

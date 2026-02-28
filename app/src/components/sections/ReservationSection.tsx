@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { GlassButton } from "../glass/GlassButton";
 import { GlassInput } from "../glass/GlassInput";
 import { GlassPanel } from "../glass/GlassPanel";
@@ -17,12 +17,12 @@ export function ReservationSection() {
           <GlassInput label="Table" placeholder="Table 4" />
         </div>
         <div className="mt-6 flex flex-wrap gap-4">
-          <NavLink to="/reservation">
+          <Link href="/reservation">
             <GlassButton>Reserve Table</GlassButton>
-          </NavLink>
-          <NavLink to="/order">
+          </Link>
+          <Link href="/order">
             <GlassButton variant="secondary">Order Now</GlassButton>
-          </NavLink>
+          </Link>
         </div>
       </GlassPanel>
     </section>

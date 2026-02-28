@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useRouter } from "next/router";
 import { GlassButton } from "../components/glass/GlassButton";
 import { GlassCard } from "../components/glass/GlassCard";
 import { SectionHeader } from "../components/common/SectionHeader";
@@ -8,7 +8,7 @@ import { useCartStore } from "../store/useCartStore";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 
 export function MenuPage() {
-  const [params] = useSearchParams();
+  const router = useRouter();
   const { categories, items, selectedCategory, setCategory, loadMenu } =
     useMenuStore();
   const addItem = useCartStore((s) => s.addItem);
@@ -20,9 +20,9 @@ export function MenuPage() {
   }, [loadMenu]);
 
   useEffect(() => {
-    const table = params.get("table");
+    const table = typeof router.query.table === "string" ? router.query.table : null;
     if (table) setTable(table);
-  }, [params, setTable]);
+  }, [router.query.table, setTable]);
 
   const filtered =
     selectedCategory === "all"

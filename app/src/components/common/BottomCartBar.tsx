@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { GlassButton } from "../glass/GlassButton";
 import { useCartStore } from "../../store/useCartStore";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
@@ -16,9 +16,9 @@ export function BottomCartBar() {
         <div className="text-sm text-white/70">{items.length} items</div>
         <div className="font-semibold">₹{total}</div>
       </div>
-      <NavLink to="/cart">
+      <Link href="/cart">
         <GlassButton>Go to Cart</GlassButton>
-      </NavLink>
+      </Link>
     </div>
   );
 }

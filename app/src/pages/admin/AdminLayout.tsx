@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from "react-router-dom";
+import Link from "next/link";
+import type { ReactNode } from "react";
 import { GlassButton } from "../../components/glass/GlassButton";
 import { useAdminStore } from "../../store/useAdminStore";
 
@@ -10,7 +11,7 @@ const navItems = [
   { label: "Reservations", path: "/admin/reservations" },
 ];
 
-export function AdminLayout() {
+export function AdminLayout({ children }: { children: ReactNode }) {
   const { logout } = useAdminStore();
 
   return (
@@ -29,22 +30,18 @@ export function AdminLayout() {
         <aside className="glass p-4 h-fit">
           <div className="flex flex-col gap-2">
             {navItems.map((item) => (
-              <NavLink
+              <Link
                 key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `rounded-full px-4 py-2 text-sm ${
-                    isActive ? "bg-white/20 text-white" : "text-white/60"
-                  }`
-                }
+                href={item.path}
+                className="rounded-full px-4 py-2 text-sm text-white/60 hover:text-white hover:bg-white/10"
               >
                 {item.label}
-              </NavLink>
+              </Link>
             ))}
           </div>
         </aside>
         <div className="space-y-6">
-          <Outlet />
+          {children}
         </div>
       </div>
     </div>

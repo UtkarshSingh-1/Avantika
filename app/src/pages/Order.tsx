@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { GlassButton } from "../components/glass/GlassButton";
 import { GlassCard } from "../components/glass/GlassCard";
 import { useUserStore } from "../store/useUserStore";
@@ -24,9 +24,9 @@ export function OrderPage() {
           />
           <div className="mt-4 flex gap-3">
             <GlassButton>Send OTP</GlassButton>
-            <NavLink to="/otp">
+            <Link href="/otp">
               <GlassButton variant="secondary">Go to OTP</GlassButton>
-            </NavLink>
+            </Link>
           </div>
         </GlassCard>
 
@@ -35,9 +35,9 @@ export function OrderPage() {
             Login to track all orders and get priority reservations.
           </p>
           <div className="mt-4 flex gap-3">
-            <NavLink to="/login">
+            <Link href="/login">
               <GlassButton>Login</GlassButton>
-            </NavLink>
+            </Link>
             <GlassButton variant="secondary">Create Account</GlassButton>
           </div>
           <div className="mt-6 text-sm text-white/60">

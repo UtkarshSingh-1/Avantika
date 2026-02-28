@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { GlassButton } from "../components/glass/GlassButton";
 import { GlassCard } from "../components/glass/GlassCard";
 import { GlassInput } from "../components/glass/GlassInput";
@@ -79,9 +79,9 @@ export function ReservationPage() {
             </p>
             <div className="mt-6 flex justify-center gap-3">
               <GlassButton>Order Now</GlassButton>
-              <NavLink to="/">
+              <Link href="/">
                 <GlassButton variant="secondary">Back to Home</GlassButton>
-              </NavLink>
+              </Link>
             </div>
           </div>
         )}

@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { GlassCard } from "../glass/GlassCard";
 import { GlassButton } from "../glass/GlassButton";
 import { SectionHeader } from "../common/SectionHeader";
@@ -25,9 +25,9 @@ export function HowQrSection() {
         title="How QR Ordering Works"
         subtitle="Online food order Sultanpur experience designed for speed, convenience, and table service."
         action={
-          <NavLink to="/order">
+          <Link href="/order">
             <GlassButton variant="secondary">Scan QR</GlassButton>
-          </NavLink>
+          </Link>
         }
       />
       <div className="grid gap-6 md:grid-cols-3">

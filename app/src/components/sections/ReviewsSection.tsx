@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { SectionHeader } from "../common/SectionHeader";
 import { GlassCard } from "../glass/GlassCard";
 import { GlassButton } from "../glass/GlassButton";
@@ -12,9 +12,9 @@ export function ReviewsSection() {
         title="Customer Reviews"
         subtitle="Loved by guests searching for online food order Sultanpur and the best food near me."
         action={
-          <NavLink to="/order">
+          <Link href="/order">
             <GlassButton variant="secondary">Order Now</GlassButton>
-          </NavLink>
+          </Link>
         }
       />
       <div className="grid gap-6 md:grid-cols-3">

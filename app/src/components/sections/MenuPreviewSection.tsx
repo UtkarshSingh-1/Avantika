@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { SectionHeader } from "../common/SectionHeader";
 import { GlassCard } from "../glass/GlassCard";
 import { GlassButton } from "../glass/GlassButton";
@@ -13,9 +13,9 @@ export function MenuPreviewSection() {
         title="Menu Preview"
         subtitle="Explore the signature menu of our restaurant Avantika Food Mall with a quick taste of top categories."
         action={
-          <NavLink to="/menu">
+          <Link href="/menu">
             <GlassButton>View Menu</GlassButton>
-          </NavLink>
+          </Link>
         }
       />
       <div className="flex flex-wrap gap-3 mb-6">

@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { SectionHeader } from "../common/SectionHeader";
 import { GlassCard } from "../glass/GlassCard";
 import { GlassButton } from "../glass/GlassButton";
@@ -24,9 +24,9 @@ export function WhyChooseSection() {
         title="Why Choose Us"
         subtitle="Restaurant Avantika Food Mall blends heritage recipes with a liquid glass dining atmosphere."
         action={
-          <NavLink to="/reservation">
+          <Link href="/reservation">
             <GlassButton variant="secondary">Reserve Table</GlassButton>
-          </NavLink>
+          </Link>
         }
       />
       <div className="grid gap-6 lg:grid-cols-3">

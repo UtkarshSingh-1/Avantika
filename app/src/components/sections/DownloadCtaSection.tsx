@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { GlassButton } from "../glass/GlassButton";
 import { GlassPanel } from "../glass/GlassPanel";
 
@@ -13,15 +13,15 @@ export function DownloadCtaSection() {
         <div className="absolute -top-20 -right-10 h-52 w-52 rounded-full bg-cyan-400/30 blur-3xl" />
         <div className="absolute -bottom-20 left-10 h-52 w-52 rounded-full bg-purple-400/30 blur-3xl" />
         <div className="relative z-10 flex flex-wrap gap-4">
-          <NavLink to="/order">
+          <Link href="/order">
             <GlassButton>Order Now</GlassButton>
-          </NavLink>
-          <NavLink to="/order">
+          </Link>
+          <Link href="/order">
             <GlassButton variant="secondary">Scan QR</GlassButton>
-          </NavLink>
-          <NavLink to="/menu">
+          </Link>
+          <Link href="/menu">
             <GlassButton variant="ghost">View Menu</GlassButton>
-          </NavLink>
+          </Link>
         </div>
       </GlassPanel>
     </section>

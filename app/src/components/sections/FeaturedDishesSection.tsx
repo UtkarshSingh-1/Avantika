@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { GlassCard } from "../glass/GlassCard";
 import { GlassButton } from "../glass/GlassButton";
 import { SectionHeader } from "../common/SectionHeader";
@@ -13,9 +13,9 @@ export function FeaturedDishesSection() {
         title="Featured Dishes"
         subtitle="Curated for the best food near me lovers in Sultanpur. Discover signature plates from our restaurant in Sultanpur."
         action={
-          <NavLink to="/order">
+          <Link href="/order">
             <GlassButton variant="secondary">Order Now</GlassButton>
-          </NavLink>
+          </Link>
         }
       />
       <div className="grid gap-6 lg:grid-cols-3">
@@ -35,9 +35,9 @@ export function FeaturedDishesSection() {
             </div>
             <div className="flex items-center justify-between mt-auto">
               <span className="text-lg font-semibold">₹{dish.price}</span>
-              <NavLink to="/order">
+              <Link href="/order">
                 <GlassButton variant="primary">Order Now</GlassButton>
-              </NavLink>
+              </Link>
             </div>
           </GlassCard>
         ))}

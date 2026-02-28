@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { GlassButton } from "../components/glass/GlassButton";
 import { GlassCard } from "../components/glass/GlassCard";
 import { GlassInput } from "../components/glass/GlassInput";
@@ -129,9 +129,9 @@ export function CartPage() {
               >
                 Place Order
               </GlassButton>
-              <NavLink to="/menu">
+              <Link href="/menu">
                 <GlassButton variant="secondary">View Menu</GlassButton>
-              </NavLink>
+              </Link>
             </div>
             {lastOrder && (
               <div className="mt-6 text-sm text-white/70">

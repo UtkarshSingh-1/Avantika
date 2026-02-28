@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useScrollHero } from "../../hooks/useScrollHero";
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { GlassButton } from "../glass/GlassButton";
 
 export function HeroSection() {
@@ -12,8 +12,11 @@ export function HeroSection() {
     overlayOpacity: 0.4,
     textOffset: 0,
   });
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const durationRef = useRef(0);
+  const heroRef = useRef<HTMLElement | null>(null);
+  const initRef = useRef(false);
+  const frameCount = 240;
+  const [frame, setFrame] = useState(1);
+  const frameRef = useRef(1);
 
   useEffect(() => {
     let raf = 0;
@@ -28,34 +31,41 @@ export function HeroSection() {
   }, [scrollState]);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const onLoaded = () => {
-      durationRef.current = video.duration || 0;
-      video.currentTime = 0;
-      video.pause();
-    };
+    if (initRef.current) return;
+    initRef.current = true;
+    let raf = 0;
 
     const onScroll = () => {
-      const progress = Math.min(window.scrollY / 700, 1);
-      const duration = durationRef.current;
-      if (duration > 0) {
-        video.currentTime = duration * progress;
-      }
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        const height = heroRef.current?.offsetHeight || window.innerHeight;
+        const progress = Math.min(window.scrollY / Math.max(1, height * 0.9), 1);
+        const next = Math.max(
+          1,
+          Math.min(frameCount, Math.floor(progress * (frameCount - 1)) + 1)
+        );
+        if (frameRef.current !== next) {
+          frameRef.current = next;
+          setFrame(next);
+        }
+        raf = 0;
+      });
     };
 
-    video.addEventListener("loadedmetadata", onLoaded);
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    onScroll();
 
     return () => {
-      video.removeEventListener("loadedmetadata", onLoaded);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
 
+
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section ref={heroRef} className="relative h-screen w-full overflow-hidden">
       <div
         className="absolute inset-0"
         style={{
@@ -64,16 +74,11 @@ export function HeroSection() {
           transition: "transform 0.1s linear",
         }}
       >
-        <video
+        <img
           className="h-full w-full object-cover"
-          ref={videoRef}
-          muted
-          playsInline
-          preload="auto"
-        >
-          <source src="/Av promo.webm" type="video/webm" />
-          <source src="/Av promo.mp4" type="video/mp4" />
-        </video>
+          src={`/hero-frames/frame_${String(frame).padStart(4, "0")}.jpg`}
+          alt="Hero sequence"
+        />
       </div>
       <div
         className="absolute inset-0 bg-hero-overlay"
@@ -98,12 +103,12 @@ export function HeroSection() {
             me with QR code restaurant ordering and curated Avantika Food Mall favorites.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <NavLink to="/order">
+            <Link href="/order">
               <GlassButton>Scan &amp; Order</GlassButton>
-            </NavLink>
-            <NavLink to="/menu">
+            </Link>
+            <Link href="/menu">
               <GlassButton variant="secondary">View Menu</GlassButton>
-            </NavLink>
+            </Link>
           </div>
         </motion.div>
       </div>

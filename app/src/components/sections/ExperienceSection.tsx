@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
 import { SectionHeader } from "../common/SectionHeader";
 import { GlassButton } from "../glass/GlassButton";
 import { GlassCard } from "../glass/GlassCard";
@@ -11,9 +11,9 @@ export function ExperienceSection() {
         title="Restaurant Experience"
         subtitle="A modern dining room with liquid glass details, soft lighting, and immersive ambience."
         action={
-          <NavLink to="/reservation">
+          <Link href="/reservation">
             <GlassButton variant="secondary">Reserve Table</GlassButton>
-          </NavLink>
+          </Link>
         }
       />
       <div className="grid gap-6 md:grid-cols-2">

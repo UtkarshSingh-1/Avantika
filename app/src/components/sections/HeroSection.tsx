@@ -7,7 +7,21 @@ export function HeroSection() {
   const heroRef = useRef<HTMLElement | null>(null);
   const frameCount = 240;
   const [progress, setProgress] = useState(0);
-  const [frame, setFrame] = useState(2);
+  const [frame, setFrame] = useState(1);
+  const loadedFramesRef = useRef<Set<number>>(new Set());
+  const lastRequestedFrameRef = useRef(1);
+
+  const getClosestLoadedFrame = (target: number) => {
+    const loaded = loadedFramesRef.current;
+    if (loaded.has(target)) return target;
+    for (let offset = 1; offset < frameCount; offset += 1) {
+      const prev = target - offset;
+      const next = target + offset;
+      if (prev >= 1 && loaded.has(prev)) return prev;
+      if (next <= frameCount && loaded.has(next)) return next;
+    }
+    return 1;
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -18,11 +32,12 @@ export function HeroSection() {
       const height = heroRef.current?.offsetHeight || window.innerHeight || 1;
       const nextProgress = Math.min(window.scrollY / Math.max(1, height * 0.9), 1);
       setProgress(nextProgress);
-      const nextFrame = Math.max(
+      const targetFrame = Math.max(
         1,
         Math.min(frameCount, Math.floor(nextProgress * (frameCount - 1)) + 1)
       );
-      setFrame(nextFrame);
+      lastRequestedFrameRef.current = targetFrame;
+      setFrame(getClosestLoadedFrame(targetFrame));
     };
 
     const onScroll = () => {
@@ -37,9 +52,15 @@ export function HeroSection() {
 
     onScroll();
 
-    const preloadCount = 60;
-    for (let i = 1; i <= preloadCount; i += 1) {
+    for (let i = 1; i <= frameCount; i += 1) {
       const img = new Image();
+      img.onload = () => {
+        loadedFramesRef.current.add(i);
+        if (i === 1) setFrame(1);
+        if (i === lastRequestedFrameRef.current) {
+          setFrame(i);
+        }
+      };
       img.src = `/hero-frames/frame_${String(i).padStart(4, "0")}.jpg`;
     }
 
@@ -48,7 +69,7 @@ export function HeroSection() {
       window.removeEventListener("resize", onResize);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [frameCount]);
 
   const style = useMemo(
     () => ({

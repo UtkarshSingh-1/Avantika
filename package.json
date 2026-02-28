@@ -2,6 +2,11 @@
   "name": "avantika-root",
   "private": true,
   "version": "1.0.0",
+  "scripts": {
+    "dev": "cd app && npm run dev:clean",
+    "build": "cd app && npm run build",
+    "start": "cd app && npm run start"
+  },
   "dependencies": {
     "next": "^14.2.5",
     "nodemailer": "^6.9.13"

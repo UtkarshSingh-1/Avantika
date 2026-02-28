@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "powershell -Command \"if (Test-Path .next) { Remove-Item -Recurse -Force .next }\" && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint ."

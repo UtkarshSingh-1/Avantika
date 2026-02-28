@@ -5,22 +5,53 @@ import { GlassButton } from "../glass/GlassButton";
 
 export function HeroSection() {
   const heroRef = useRef<HTMLElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const frameCount = 240;
   const [progress, setProgress] = useState(0);
-  const [frame, setFrame] = useState(1);
-  const loadedFramesRef = useRef<Set<number>>(new Set());
-  const lastRequestedFrameRef = useRef(1);
 
-  const getClosestLoadedFrame = (target: number) => {
-    const loaded = loadedFramesRef.current;
-    if (loaded.has(target)) return target;
-    for (let offset = 1; offset < frameCount; offset += 1) {
-      const prev = target - offset;
-      const next = target + offset;
-      if (prev >= 1 && loaded.has(prev)) return prev;
-      if (next <= frameCount && loaded.has(next)) return next;
+  const targetFrameRef = useRef(1);
+  const drawnFrameRef = useRef(0);
+  const imagesRef = useRef<(HTMLImageElement | null)[]>(
+    Array.from({ length: frameCount + 1 }, () => null)
+  );
+
+  const fitCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(1, canvas.clientWidth);
+    const height = Math.max(1, canvas.clientHeight);
+    const nextWidth = Math.floor(width * dpr);
+    const nextHeight = Math.floor(height * dpr);
+
+    if (canvas.width !== nextWidth || canvas.height !== nextHeight) {
+      canvas.width = nextWidth;
+      canvas.height = nextHeight;
     }
-    return 1;
+  };
+
+  const drawFrame = (index: number) => {
+    const canvas = canvasRef.current;
+    const image = imagesRef.current[index];
+    if (!canvas || !image || !image.complete || image.naturalWidth === 0) return;
+
+    fitCanvas();
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const cw = canvas.width;
+    const ch = canvas.height;
+    const iw = image.naturalWidth;
+    const ih = image.naturalHeight;
+    const scale = Math.max(cw / iw, ch / ih);
+    const dw = iw * scale;
+    const dh = ih * scale;
+    const dx = (cw - dw) / 2;
+    const dy = (ch - dh) / 2;
+
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(image, dx, dy, dw, dh);
+    drawnFrameRef.current = index;
   };
 
   useEffect(() => {
@@ -32,12 +63,13 @@ export function HeroSection() {
       const height = heroRef.current?.offsetHeight || window.innerHeight || 1;
       const nextProgress = Math.min(window.scrollY / Math.max(1, height * 0.9), 1);
       setProgress(nextProgress);
+
       const targetFrame = Math.max(
         1,
         Math.min(frameCount, Math.floor(nextProgress * (frameCount - 1)) + 1)
       );
-      lastRequestedFrameRef.current = targetFrame;
-      setFrame(getClosestLoadedFrame(targetFrame));
+      targetFrameRef.current = targetFrame;
+      drawFrame(targetFrame);
     };
 
     const onScroll = () => {
@@ -45,24 +77,37 @@ export function HeroSection() {
       raf = requestAnimationFrame(update);
     };
 
-    const onResize = onScroll;
+    const onResize = () => {
+      fitCanvas();
+      if (drawnFrameRef.current > 0) {
+        drawFrame(drawnFrameRef.current);
+      } else {
+        drawFrame(1);
+      }
+      onScroll();
+    };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
 
-    onScroll();
-
+    // Preload all frames; draw current target only when that frame is loaded.
     for (let i = 1; i <= frameCount; i += 1) {
       const img = new Image();
+      img.decoding = "async";
       img.onload = () => {
-        loadedFramesRef.current.add(i);
-        if (i === 1) setFrame(1);
-        if (i === lastRequestedFrameRef.current) {
-          setFrame(i);
+        if (i === 1 && drawnFrameRef.current === 0) {
+          drawFrame(1);
+          return;
+        }
+        if (i === targetFrameRef.current) {
+          drawFrame(i);
         }
       };
       img.src = `/hero-frames/frame_${String(i).padStart(4, "0")}.jpg`;
+      imagesRef.current[i] = img;
     }
+
+    onResize();
 
     return () => {
       window.removeEventListener("scroll", onScroll);
@@ -91,13 +136,7 @@ export function HeroSection() {
           willChange: "transform",
         }}
       >
-        <img
-          className="h-full w-full object-cover"
-          src={`/hero-frames/frame_${String(frame).padStart(4, "0")}.jpg`}
-          alt="Avantika hero sequence"
-          loading="eager"
-          decoding="async"
-        />
+        <canvas ref={canvasRef} className="h-full w-full" aria-label="Avantika hero sequence" />
       </div>
 
       <div

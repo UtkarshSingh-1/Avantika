@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { GlassButton } from "../components/glass/GlassButton";
 import { GlassCard } from "../components/glass/GlassCard";
 import { GlassInput } from "../components/glass/GlassInput";
-import { tables } from "../data/tables";
 import { useReservationStore } from "../store/useReservationStore";
+import { api } from "../lib/api";
+import type { Table } from "../types";
 
 export function ReservationPage() {
   const router = useRouter();
@@ -15,10 +16,20 @@ export function ReservationPage() {
   const [time, setTime] = useState("");
   const [guests, setGuests] = useState(2);
   const [table, setTable] = useState("");
+  const [tables, setTables] = useState<Table[]>([]);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { createReservation } = useReservationStore();
+
+  useEffect(() => {
+    api.get<Table[]>("/tables")
+      .then((data) => {
+        setTables(data);
+        if (data[0]) setTable(data[0].id);
+      })
+      .catch(() => setTables([]));
+  }, []);
 
   const handleSubmit = async () => {
     setError("");
@@ -28,14 +39,7 @@ export function ReservationPage() {
     }
     setLoading(true);
     try {
-      await createReservation({
-        name,
-        phone,
-        date,
-        time,
-        guests,
-        table,
-      });
+      await createReservation({ name, phone, date, time, guests, table });
       setSuccess(true);
     } catch {
       setError("Reservation failed. Please try again.");
@@ -45,12 +49,12 @@ export function ReservationPage() {
   };
 
   return (
-    <div className="section-wrap pt-32 flex justify-center">
-      <GlassCard className="max-w-2xl w-full">
+    <div className="section-wrap flex justify-center pt-32">
+      <GlassCard className="w-full max-w-2xl">
         {!success ? (
           <>
             <h2 className="text-2xl font-display">Reserve a Table</h2>
-            <p className="text-white/70 mt-2">
+            <p className="mt-2 text-white/70">
               Book your table reservation restaurant experience in Sultanpur.
             </p>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -69,14 +73,13 @@ export function ReservationPage() {
               <label className="flex flex-col gap-2 text-sm text-white/70">
                 Table
                 <select
-                  className="glass glass-hover rounded-full px-4 py-2 bg-transparent"
+                  className="glass glass-hover rounded-full bg-transparent px-4 py-2 text-white"
                   value={table}
                   onChange={(e) => setTable(e.target.value)}
                 >
-                  <option value="">Select table</option>
                   {tables.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
+                    <option key={t.id} value={t.id} style={{ color: "#111" }}>
+                      Table {t.id.replace("T", "")}
                     </option>
                   ))}
                 </select>
@@ -95,7 +98,7 @@ export function ReservationPage() {
         ) : (
           <div className="text-center">
             <h2 className="text-2xl font-display">Reservation Confirmed</h2>
-            <p className="text-white/70 mt-2">
+            <p className="mt-2 text-white/70">
               Your table is reserved. We look forward to serving you at Avantika Food Mall.
             </p>
             <div className="mt-6 flex justify-center gap-3">

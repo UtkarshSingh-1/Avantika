@@ -86,7 +86,6 @@ export function MenuPage() {
               <GlassButton
                 onClick={() => {
                   addItem(dish);
-                  router.push("/cart");
                 }}
               >
                 Add to Cart

@@ -80,7 +80,7 @@ export function OrderPage() {
             Use QR code restaurant ordering for your table. The system will auto
             assign table number.
           </p>
-          <GlassButton className="mt-4" onClick={() => router.push("/menu?table=T1")}>
+          <GlassButton className="mt-4" onClick={() => router.push("/scan")}>
             Scan QR
           </GlassButton>
         </GlassCard>

@@ -1,13 +1,20 @@
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { GlassButton } from "../components/glass/GlassButton";
 import { GlassCard } from "../components/glass/GlassCard";
 import { GlassInput } from "../components/glass/GlassInput";
+import { GlassModal } from "../components/glass/GlassModal";
 import { Toggle } from "../components/common/Toggle";
-import { tables } from "../data/tables";
 import { useCartStore } from "../store/useCartStore";
 import { useOrderStore } from "../store/useOrderStore";
+import { useAuthStore } from "../store/useAuthStore";
+import { useUserStore } from "../store/useUserStore";
+import { api } from "../lib/api";
+import type { Table } from "../types";
 
 export function CartPage() {
+  const router = useRouter();
   const {
     items,
     removeItem,
@@ -20,11 +27,42 @@ export function CartPage() {
     total,
   } = useCartStore();
   const { placeOrder, loading, lastOrder } = useOrderStore();
+  const user = useAuthStore((s) => s.user);
+  const otpLoggedIn = useUserStore((s) => s.isLoggedIn);
+  const isLoggedIn = Boolean(user) || otpLoggedIn;
+  const [tables, setTables] = useState<Table[]>([]);
+  const [loginPrompt, setLoginPrompt] = useState(false);
+
+  useEffect(() => {
+    api.get<Table[]>("/tables")
+      .then(setTables)
+      .catch(() => setTables([]));
+  }, []);
 
   const canPlaceOrder = items.length > 0 && (!dineIn || Boolean(table));
 
+  const handlePlaceOrder = async () => {
+    if (!isLoggedIn) {
+      setLoginPrompt(true);
+      return;
+    }
+    await placeOrder();
+  };
+
   return (
     <div className="section-wrap pt-32">
+      <GlassModal open={loginPrompt} onClose={() => setLoginPrompt(false)} title="Login Required">
+        <p className="text-white/70">
+          Please login before placing the order. You can add items to cart without login.
+        </p>
+        <div className="mt-4 flex gap-3">
+          <GlassButton onClick={() => router.push("/login?returnTo=/cart")}>Go to Login</GlassButton>
+          <GlassButton variant="secondary" onClick={() => setLoginPrompt(false)}>
+            Continue Browsing
+          </GlassButton>
+        </div>
+      </GlassModal>
+
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
           <GlassCard title="Your Cart" subtitle="Review and update your order.">
@@ -42,23 +80,14 @@ export function CartPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button
-                          className="glass rounded-full px-3 py-1"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        >
+                        <button className="glass rounded-full px-3 py-1" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
                           -
                         </button>
                         <span>{item.quantity}</span>
-                        <button
-                          className="glass rounded-full px-3 py-1"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        >
+                        <button className="glass rounded-full px-3 py-1" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
                           +
                         </button>
-                        <button
-                          className="text-white/50 hover:text-white"
-                          onClick={() => removeItem(item.id)}
-                        >
+                        <button className="text-white/50 hover:text-white" onClick={() => removeItem(item.id)}>
                           Remove
                         </button>
                       </div>
@@ -82,7 +111,7 @@ export function CartPage() {
                   onClick={() => setTable(t.id)}
                   className={`glass rounded-full px-4 py-2 text-sm ${table === t.id ? "bg-white/20" : ""}`}
                 >
-                  {t.name}
+                  Table {t.id.replace("T", "")}
                 </button>
               ))}
             </div>
@@ -108,7 +137,7 @@ export function CartPage() {
               <span className="text-lg font-semibold text-white">INR {total()}</span>
             </div>
             <div className="mt-6 space-y-3">
-              <GlassButton disabled={!canPlaceOrder || loading} onClick={() => placeOrder()}>
+              <GlassButton disabled={!canPlaceOrder || loading} onClick={handlePlaceOrder}>
                 {loading ? "Placing..." : "Place Order"}
               </GlassButton>
               <Link href="/menu">

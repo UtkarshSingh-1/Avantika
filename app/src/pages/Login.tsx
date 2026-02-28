@@ -15,6 +15,10 @@ export function LoginPage() {
   const [passwordInput, setPasswordInput] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const returnTo =
+    typeof router.query.returnTo === "string" && router.query.returnTo.startsWith("/")
+      ? router.query.returnTo
+      : "/";
 
   const handleUserLogin = async () => {
     setError("");
@@ -42,7 +46,7 @@ export function LoginPage() {
       router.push("/admin");
       return;
     }
-    router.push("/");
+    router.push(returnTo);
   };
 
   const handleLogin = async () => {
@@ -60,9 +64,9 @@ export function LoginPage() {
         router.push("/admin");
         return;
       }
-      router.push("/");
+      router.push(returnTo);
     }
-  }, [user, adminLogin, router]);
+  }, [user, adminLogin, returnTo, router]);
 
   return (
     <div className="section-wrap pt-32 flex justify-center">

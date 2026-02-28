@@ -115,7 +115,7 @@ export function AdminMenu() {
             onChange={(e) => setCategoryId(e.target.value)}
           >
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
+              <option key={cat.id} value={cat.id} style={{ color: "#111" }}>
                 {cat.name}
               </option>
             ))}

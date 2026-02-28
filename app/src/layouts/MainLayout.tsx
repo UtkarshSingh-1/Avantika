@@ -64,7 +64,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
             </Link>
           ) : (
             <>
-              <GlassButton variant="secondary" onClick={() => router.push("/menu?table=T1")}>
+              <GlassButton variant="secondary" onClick={() => router.push("/scan")}>
                 Scan QR
               </GlassButton>
               <Link href="/cart" className="relative">

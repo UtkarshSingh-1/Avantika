@@ -1,4 +1,22 @@
-export let menuCategories = [
+type MenuCategoryData = {
+  id: string;
+  name: string;
+  description: string;
+};
+
+type MenuItemData = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  images?: string[];
+  spicy: boolean;
+  popular?: boolean;
+  categoryId: string;
+};
+
+export let menuCategories: MenuCategoryData[] = [
   {
     id: "starters",
     name: "Signature Starters",
@@ -31,7 +49,7 @@ export let menuCategories = [
   },
 ];
 
-export let menuItems = [
+export let menuItems: MenuItemData[] = [
   {
     id: "s1",
     name: "Smoked Paneer Tikka",

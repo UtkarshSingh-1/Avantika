@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { GlassButton } from "../components/glass/GlassButton";
 import { GlassCard } from "../components/glass/GlassCard";
@@ -9,11 +9,11 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 
 export function MenuPage() {
   const router = useRouter();
-  const { categories, items, selectedCategory, setCategory, loadMenu } =
-    useMenuStore();
+  const { categories, items, selectedCategory, setCategory, loadMenu } = useMenuStore();
   const addItem = useCartStore((s) => s.addItem);
   const setTable = useCartStore((s) => s.setTable);
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const [activeImage, setActiveImage] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadMenu();
@@ -37,10 +37,7 @@ export function MenuPage() {
         action={
           <>
             <GlassButton onClick={() => router.push("/cart")}>Order Now</GlassButton>
-            <GlassButton
-              variant="secondary"
-              onClick={() => router.push("/reservation")}
-            >
+            <GlassButton variant="secondary" onClick={() => router.push("/reservation")}>
               Reserve Table
             </GlassButton>
           </>
@@ -49,9 +46,7 @@ export function MenuPage() {
 
       <div className="mb-8 flex flex-wrap gap-3">
         <button
-          className={`glass rounded-full px-4 py-2 text-sm ${
-            selectedCategory === "all" ? "bg-white/20" : ""
-          }`}
+          className={`glass rounded-full px-4 py-2 text-sm ${selectedCategory === "all" ? "bg-white/20" : ""}`}
           onClick={() => setCategory("all")}
         >
           All
@@ -59,9 +54,7 @@ export function MenuPage() {
         {categories.map((cat) => (
           <button
             key={cat.id}
-            className={`glass rounded-full px-4 py-2 text-sm ${
-              selectedCategory === cat.id ? "bg-white/20" : ""
-            }`}
+            className={`glass rounded-full px-4 py-2 text-sm ${selectedCategory === cat.id ? "bg-white/20" : ""}`}
             onClick={() => setCategory(cat.id)}
           >
             {cat.name}
@@ -70,29 +63,41 @@ export function MenuPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((dish) => (
-          <GlassCard key={dish.id} className="flex flex-col gap-4">
-            <img
-              src={dish.image}
-              alt={dish.name}
-              className="h-44 w-full rounded-xl object-cover"
-            />
-            <div>
-              <h3 className="text-xl font-semibold">{dish.name}</h3>
-              <p className="mt-2 text-sm text-white/70">{dish.description}</p>
-            </div>
-            <div className="mt-auto flex items-center justify-between">
-              <span className="text-lg font-semibold">INR {dish.price}</span>
-              <GlassButton
-                onClick={() => {
-                  addItem(dish);
-                }}
-              >
-                Add to Cart
-              </GlassButton>
-            </div>
-          </GlassCard>
-        ))}
+        {filtered.map((dish) => {
+          const images = dish.images && dish.images.length ? dish.images : [dish.image];
+          const index = activeImage[dish.id] ?? 0;
+          const currentImage = images[Math.min(index, images.length - 1)] || dish.image;
+
+          return (
+            <GlassCard key={dish.id} className="flex flex-col gap-4">
+              <img src={currentImage} alt={dish.name} className="h-44 w-full rounded-xl object-cover" />
+
+              {images.length > 1 && (
+                <div className="flex flex-wrap gap-2">
+                  {images.map((img, i) => (
+                    <button
+                      key={`${dish.id}-${i}`}
+                      className={`overflow-hidden rounded-lg border ${i === index ? "border-white/80" : "border-white/20"}`}
+                      onClick={() => setActiveImage((prev) => ({ ...prev, [dish.id]: i }))}
+                    >
+                      <img src={img} alt={`${dish.name} ${i + 1}`} className="h-10 w-12 object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div>
+                <h3 className="text-xl font-semibold">{dish.name}</h3>
+                <p className="mt-2 text-sm text-white/70">{dish.description}</p>
+              </div>
+
+              <div className="mt-auto flex items-center justify-between">
+                <span className="text-lg font-semibold">INR {dish.price}</span>
+                <GlassButton onClick={() => addItem(dish)}>Add to Cart</GlassButton>
+              </div>
+            </GlassCard>
+          );
+        })}
       </div>
 
       {isMobile && (

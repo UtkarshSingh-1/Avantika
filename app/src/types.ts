@@ -23,10 +23,18 @@ export type CartItem = {
   notes?: string;
 };
 
+export type OrderItem = {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  notes?: string;
+};
+
 export type Order = {
   id: string;
   table: string | null;
-  items: CartItem[];
+  items: OrderItem[];
   total: number;
   status: "pending" | "confirmed" | "preparing" | "served" | "completed";
   createdAt: string;

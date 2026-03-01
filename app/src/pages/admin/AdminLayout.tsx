@@ -6,6 +6,7 @@ import { useAdminStore } from "../../store/useAdminStore";
 const navItems = [
   { label: "Dashboard", path: "/admin" },
   { label: "Orders", path: "/admin/orders" },
+  { label: "Categories", path: "/admin/categories" },
   { label: "Menu", path: "/admin/menu" },
   { label: "Tables", path: "/admin/tables" },
   { label: "Reservations", path: "/admin/reservations" },

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Order } from "../types";
+import type { Order, OrderItem } from "../types";
 import { api } from "../lib/api";
 import { useCartStore } from "./useCartStore";
 
@@ -30,11 +30,18 @@ export const useOrderStore = create<OrderState>((set, get) => ({
   placeOrder: async () => {
     const cart = useCartStore.getState();
     if (cart.items.length === 0 || (cart.dineIn && !cart.table)) return null;
+    const lineItems: OrderItem[] = cart.items.map((item) => ({
+      id: item.menuItem.id,
+      name: item.menuItem.name,
+      price: item.menuItem.price,
+      quantity: item.quantity,
+      notes: item.notes,
+    }));
     set({ loading: true });
     try {
       const newOrder = await api.post<Order>("/orders", {
         table: cart.table,
-        items: cart.items,
+        items: lineItems,
         total: cart.total(),
         dineIn: cart.dineIn,
       });
